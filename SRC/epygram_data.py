@@ -25,7 +25,7 @@ def load_data_from_grib(basis, term, vconf="indien"):
     vconf = "4dvarfr"
     '''
     vapp = "arome"  # "arpege" "arome"
-    vconf = "indien"  # arome : "indien" "antilles" "caledonie" "polynesie"
+    vconf = vconf  # arome : "indien" "antilles" "caledonie" "polynesie"
     members = None  # list(range(1,17,1))
     param = "ff10m"
     ########
