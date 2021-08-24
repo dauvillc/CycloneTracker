@@ -90,7 +90,8 @@ def load_data_from_grib(basis, term, vconf="indien"):
                                  namespace='vortex.multi.fr',
                                  nativefmt='grib',
                                  members=members,
-                                 shouldfly=True)
+                                 shouldfly=True,
+                                 uselocalcache=False)
 
     # FIELDS COMPUTATION FROM THE GRIB
     if param == "ff10m":  # need to pre-compute the variable
