@@ -1,7 +1,7 @@
 """
 Usage: python main.py <basis hours>
-Looks for and track a potential cyclone in the AROME output of the current
-day, for the specified basis.
+Looks for and track a potential cyclone in yesterday's AROME output,
+for the specified basis.
 <basis hours>: Hour of the basis from which the data should be taken from.
 All data is taken through vortex as GRIB files. Should be one of
 [0, 6, 12, 18].
@@ -47,8 +47,12 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python main.py <basis hours>")
         sys.exit(-1)
-    basis = int(sys.argv[1])
-    initial_day = dt.datetime.combine(dt.date.today(), dt.time(hour=basis))
+    basis_hours = int(sys.argv[1])
+
+    # Retrieves yesterday's basis
+    initial_day = dt.datetime.combine(dt.date.today(),
+                                      dt.time(hour=basis_hours))
+    initial_day -= dt.timedelta(days=1)
 
     # ======================= SUCCESSIVE TRACKING ===================
 
@@ -60,6 +64,7 @@ if __name__ == "__main__":
     day = deepcopy(initial_day)
     term = dt.timedelta(hours=0)
     last_day = day
+    basis = initial_day
     tracker = SingleTrajTracker(latitudes, longitudes)
     while day <= last_day:
         # We try to load the grib for basis and term until we reach
@@ -68,8 +73,6 @@ if __name__ == "__main__":
             print("Fetching GRIB for {}+{:1f}h".format(
                 day,
                 term.total_seconds() / 3600))
-            # Dates
-            basis = day
             # Assemble the basis and term into a validity
             validity = FieldValidity(basis + term, basis=basis, term=term)
 
@@ -103,9 +106,10 @@ if __name__ == "__main__":
     if not os.path.exists(tmp_save_dir):
         os.makedirs(tmp_save_dir)
     tracker.plot_current_trajectory(
-        os.path.join(tmp_save_dir, "ended_trajectories.png"))
-    tracker.plot_trajectories(
         os.path.join(tmp_save_dir, "ongoing_trajectory.png"))
+    tracker.plot_trajectories(
+        os.path.join(tmp_save_dir, "ended_trajectories.png"))
+    tracker.evolution_graph(os.path.join(tmp_save_dir, "evolution_chart.png"))
 
     # Saves the tracker's data
     print("Saving the tracker..")
