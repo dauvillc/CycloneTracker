@@ -108,8 +108,10 @@ def load_data_from_grib(basis, term, vconf="indien"):
     # 2 channels
     ff10m_channel = field.getdata()
     ta850_channel = field_ta850.getdata()
-    # WATCHOUT: If southern hemisphere, use -ta850 instead !
-    if vconf in ["indien", "caledonie", "polynesie"]:
-        ta850_channel = -ta850_channel
+
+    # Get the absolute value of the TA850 field since the model was trained
+    # on northern hemisphere examples, where it is positive
+    ta850_channel = np.abs(ta850_channel)
+
     data = np.swapaxes(np.stack([ff10m_channel, ta850_channel], axis=0), 1, 2)
     return np.ascontiguousarray(data)
