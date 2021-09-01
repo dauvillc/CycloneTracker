@@ -28,8 +28,18 @@ def save_hdf5_images(data, dest_path):
 
 def parse_coordinates_range(str_coords):
     """
-    Parses geographical coordinates in the format
-    min:max:step into a numpy array.
+    Parses geographical coordinates and returns the latitudes /
+    longitudes values defining a domain.
+    :param str_coords: Coordinates string in the format
+        min-lat:max-lat:step_min-long:max-long:step
+    :return: Two 1D arrays latitudes, longitudes. Each value in the
+        arrays gives the coordinate for the associated row / column
+        in the domain.
     """
-    low, high, step = str_coords.split(":")
-    return np.arange(float(low), float(high), float(step))
+    lat_str, long_str = str_coords.split("_")
+
+    low, high, step = lat_str.split(":")
+    lats_range = np.arange(float(low), float(high), float(step))
+    low, high, step = long_str.split(":")
+    longs_range = np.arange(float(low), float(high), float(step))
+    return lats_range, longs_range

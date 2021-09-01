@@ -15,7 +15,7 @@ import datetime as dt
 import sys
 from copy import deepcopy
 from epygram.base import FieldValidity
-from tools import parse_coordinates_range
+from TST.tools import parse_coordinates_range
 from configparser import ConfigParser
 from prediction import resize, load_model, make_prediction, make_segmentation
 from correction import filter_smallest_islets
@@ -29,26 +29,26 @@ if __name__ == "__main__":
     # Disable Tensorflow's logging
     os.environ["TF_CPP_MIN_LOG_LEVEL"] = '3'
 
+    # Original basis
+    if len(sys.argv) != 3:
+        print("Usage: python main.py <basis hours> <domain>")
+        sys.exit(-1)
+
     cfg = ConfigParser()
     cfg.read("config_tracker.cfg")
 
-    latitudes = parse_coordinates_range(cfg.get("geography", "latitudes"))
-    # Reverses the latitudes array, since the latitude increases upwards
-    # whereas the indexes of pixels increase downwards
-    latitudes = np.ascontiguousarray(latitudes[::-1])
-    longitudes = parse_coordinates_range(cfg.get("geography", "longitudes"))
-    domain = cfg.get("geography", "domain")
     save_dir = cfg.get("paths", "save_directory")
+
+    domain = sys.argv[2]
+    latitudes, longitudes = parse_coordinates_range(cfg.get("domains", domain))
+    # We need to reverse the latitudes array, since it actually increases
+    # downwards w/ regards to the pixels
+    latitudes = np.ascontiguousarray(latitudes[::-1])
 
     model_path = cfg.get("paths", "model")
     model = load_model(model_path)
 
-    # Original basis
-    if len(sys.argv) != 2:
-        print("Usage: python main.py <basis hours>")
-        sys.exit(-1)
     basis_hours = int(sys.argv[1])
-
     # Retrieves yesterday's basis
     initial_day = dt.datetime.combine(dt.date.today(),
                                       dt.time(hour=basis_hours))
@@ -81,8 +81,6 @@ if __name__ == "__main__":
                 basis, term, domain),
                                         axis=0)
             input_data = resize(input_data)
-            # Add 1 hour to the term for the next loop iteration
-            term += dt.timedelta(hours=1)
 
             # Make the prediction / segmentation and correct it
             probas = make_prediction(input_data, model, batch_size=2)
