@@ -13,8 +13,12 @@ def load_data_from_grib(basis, term, vconf="indien"):
         the requested validity.
     :param term: datetime.timedelta, term for the validity.
     :param vconf: Domain (indien, antilles, caledonie, polynesie)
-    :return: an array of shape (2, H, W). The channels are FF10m and TA850,
+    :return: A tuple (D, lats, longs) where:
+    - D is the data, as an array of shape (2, H, W).
+        The channels are FF10m and TA850,
         and are rotated by 90° clockwise to fit the model's expectations.
+    - lats is a 1D array of shape (H,) giving the latitude at each row;
+    - longs is a 1D array of shape (W,) giving the longitude at each column.
     """
     # SETUP
     epygram.init_env()
@@ -114,4 +118,9 @@ def load_data_from_grib(basis, term, vconf="indien"):
     ta850_channel = np.abs(ta850_channel)
 
     data = np.swapaxes(np.stack([ff10m_channel, ta850_channel], axis=0), 1, 2)
-    return np.ascontiguousarray(data)
+
+    # Retrieves the domain's lonlat coords from the GRIB
+    longs, lats = field_ta850.geometry.get_lonlat_grid()
+    longs, lats = longs[0], lats[:, 0]
+
+    return np.ascontiguousarray(data), lats, longs
