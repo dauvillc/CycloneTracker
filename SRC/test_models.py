@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     # Load configuration paths
     config = ConfigParser()
-    config.read("configuration_test.txt")
+    config.read("config_test.cfg")
     model_path = config.get("paths", "model_path")
     data_path = config.get("paths", "input_path")
     target_path = config.get("paths", "target_path")
