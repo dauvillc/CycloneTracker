@@ -17,7 +17,7 @@ from epygram.base import FieldValidity
 from configparser import ConfigParser
 from prediction import resize, load_model, make_prediction, make_segmentation
 from correction import filter_smallest_islets
-from TST import SingleTrajTracker, load_single_traj_tracker
+from TST import SingleTrajTracker
 from epygram_data import load_data_from_grib
 from paramiko import SSHClient
 from scp import SCPClient
@@ -101,12 +101,7 @@ if __name__ == "__main__":
             break
 
     # TRACKING
-    # Tries to load the saved tracker, or creates a new one otherwise
-    tracker_save_dir = cfg.get("paths", "tracker_save_dir")
-    try:
-        tracker = load_single_traj_tracker(tracker_save_dir)
-    except (IOError, FileNotFoundError):
-        tracker = SingleTrajTracker(latitudes, longitudes)
+    tracker = SingleTrajTracker(latitudes, longitudes)
 
     # Successively adds the new states to the tracker
     for wind, seg, val in zip(wind_fields, segmentations, validities):
@@ -125,7 +120,7 @@ if __name__ == "__main__":
 
     # Saves the tracker's data
     print("Saving the tracker..")
-    tracker.save(tracker_save_dir)
+    tracker.save(tmp_save_dir)
 
     # Destroys the "shouldfly-" files created by vortex as they are HEAVY
     os.system("rm -f shouldfly-*")
