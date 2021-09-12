@@ -6,7 +6,7 @@ import epygram
 import usevortex as vtx
 
 
-def load_data_from_grib(basis, term, vconf="indien"):
+def load_data_from_grib(basis, term, vconf):
     """
     Loads the input data for the model from a grib.
     :param basis: datetime.datetime object indicating the basis for
@@ -29,7 +29,6 @@ def load_data_from_grib(basis, term, vconf="indien"):
     vconf = "4dvarfr"
     '''
     vapp = "arome"  # "arpege" "arome"
-    vconf = vconf  # arome : "indien" "antilles" "caledonie" "polynesie"
     members = None  # list(range(1,17,1))
     param = "ff10m"
     ########
@@ -98,11 +97,11 @@ def load_data_from_grib(basis, term, vconf="indien"):
                                  uselocalcache=False)
 
     # FIELDS COMPUTATION FROM THE GRIB
-    if param == "ff10m":  # need to pre-compute the variable
-        fieldU = resource[0].readfield(GribID[param][0])
-        fieldV = resource[0].readfield(GribID[param][1])
-        fieldVect = epygram.fields.make_vector_field(fieldU, fieldV)
-        field = fieldVect.to_module()  # sqrt(U*U + V*V)
+    fieldU = resource[0].readfield(GribID[param][0])
+    fieldV = resource[0].readfield(GribID[param][1])
+    fieldVect = epygram.fields.make_vector_field(fieldU, fieldV)
+    field = fieldVect.to_module()  # sqrt(U*U + V*V)
+
     # Reads the TA850 parameter
     field_ta850 = resource[0].readfield(GribID["ta850"])
     resource[0].close()
