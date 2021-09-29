@@ -122,4 +122,7 @@ def load_data_from_grib(basis, term, vconf):
     longs, lats = field_ta850.geometry.get_lonlat_grid()
     longs, lats = longs[0], lats[:, 0]
 
+    # Reverses the latitudes as pixel 0 is actually the highest latitude
+    lats = lats[::-1]
+
     return np.ascontiguousarray(data), lats, longs
